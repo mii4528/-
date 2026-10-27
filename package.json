@@ -1,0 +1,12 @@
+{
+  "name": "outdoor-mafia",
+  "version": "1.0.0",
+  "description": "교사 아우팅용 야외 어몽어스형 마피아 게임 (모바일 웹)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/rules.test.js"
+  },
+  "engines": { "node": ">=18" }
+}
