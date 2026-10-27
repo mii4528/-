@@ -301,10 +301,11 @@ function taskCard(v) {
   if (t.type === 'report') how = t.step === 1 && t.options
     ? `<b>${esc(t.question)}</b>`
     : `<b>${esc(t.loc)}</b>에 가서 QR을 찍고 표지를 확인하세요.`;
-  const label = { visit: '방문 점검', carry: '물품 운반', report: '현장 보고' }[t.type];
+  const label = t.title ? esc(t.title) : { visit: '방문 점검', carry: '물품 운반', report: '현장 보고' }[t.type];
   return `<div class="card hl">
     <div class="row"><h3 style="margin:0">임무 ${t.index} / ${t.total} · ${label}</h3></div>
     <p style="font-size:20px;margin-top:8px">📍 ${how}</p>
+    ${t.desc ? `<p class="small" style="color:var(--accent)">${esc(t.desc)}</p>` : ''}
     ${t.type === 'report' && t.step === 1 && t.options ? t.options.map(o => `<button class="choice" data-a="answer" data-task="${esc(t.id)}" data-opt="${esc(o)}" data-needs-online>${esc(o)}</button>`).join('') : ''}
     ${t.type === 'carry' && t.step === 1 ? '<p class="small muted">출발지 확인 완료 ✔</p>' : ''}
   </div>`;
@@ -321,7 +322,7 @@ function viewActive(v) {
         <p class="small" style="margin-top:10px">동료: <b>${v.mafia.mates.map(m => esc(m.name) + (m.out ? ' (탈락)' : '')).join(', ') || '없음'}</b></p>
         ${(() => {
           const ready = v.mafia.killReadyAt <= serverNow() && !v.paused;
-          return `<button class="danger" data-a="kill" data-needs-online ${ready ? '' : 'data-off="1"'} style="margin-top:8px">${ready ? '🔪 암살하기' : `🔪 암살 대기 <span data-until="${v.mafia.killReadyAt}" ${v.paused ? `data-frozen="${v.mafia.killRemainMs}"` : ''} data-suffix="초" data-done="rerender"></span>`}</button>`;
+          return `<button class="danger" data-a="kill" data-needs-online ${ready ? '' : 'data-off="1"'} style="margin-top:8px">${ready ? '🔪 암살하기' : `🔪 암살 대기 <span data-until="${v.mafia.killReadyAt}" ${v.paused ? `data-frozen="${v.mafia.killRemainMs}"` : ''} data-unit="kr" data-done="rerender"></span>`}</button>`;
         })()}` : ''}
     </div>` : '';
   return `
@@ -336,7 +337,7 @@ function viewActive(v) {
     ${roleBlock(v, true)}
     ${!ghost ? `<div class="card">
       <button class="ghostbtn" data-a="emergency" data-needs-online ${me.emergencyLeft <= 0 || emLeft ? 'data-off="1"' : ''}>
-        📢 긴급회의 ${me.emergencyLeft <= 0 ? '(사용 완료)' : emLeft ? `<span data-until="${v.emergencyReadyAt}" data-suffix="초 후 가능" data-done="rerender"></span>` : `(남은 ${me.emergencyLeft}회)`}
+        📢 긴급회의 ${me.emergencyLeft <= 0 ? '(사용 완료)' : emLeft ? `<span data-until="${v.emergencyReadyAt}" data-unit="kr" data-suffix=" 후 가능" data-done="rerender"></span>` : `(남은 ${me.emergencyLeft}회)`}
       </button></div>` : ''}
     <div class="dock"><div class="inner"><button class="primary" data-a="scan" data-needs-online>📷 QR 스캔 / 코드 입력</button></div></div>`;
 }

@@ -119,6 +119,7 @@ function allowCreate(ip) {
 const HOST_ACTIONS = {
   settings: (r, b) => G.updateSettings(r, b.settings || {}),
   locations: (r, b) => G.saveLocations(r, b.locations),
+  missions: (r, b) => G.saveMissions(r, b.missions),
   kick: (r, b) => G.kick(r, b.pid),
   assign: (r) => G.assignRoles(r),
   start: (r, b) => G.startGame(r, !!b.force),
@@ -255,10 +256,14 @@ function printPage(req, res, url) {
       cards += `<div class="card"><h3>📍 ${esc(l.name)}</h3>${QR.svg(scanUrl(l.qr))}<p class="code">코드 <b>${l.code}</b></p><p class="small">${esc(tags || '방문 점검')}</p></div>`;
     }
     cards += '</section>';
-    const signs = room.locations.filter(l => l.sign);
-    if (signs.length) {
+    // 임무 목록을 직접 만든 경우 그 질문을, 아니면 장소 표지 질문을 정답표에 넣습니다.
+    const custom = (room.missions || []).filter(m => m.type === 'report');
+    const rows = (room.missions || []).length
+      ? custom.map(m => ({ place: (room.locations.find(l => l.id === m.loc) || {}).name || '?', q: m.q.question, a: m.q.answer }))
+      : room.locations.filter(l => l.sign).map(l => ({ place: l.name, q: l.sign.question, a: l.sign.answer }));
+    if (rows.length) {
       cards += '<section class="sheet"><h2 class="title">진행자용 표지 정답표 (참가자에게 보이지 않게 보관)</h2><table><tr><th>장소</th><th>질문</th><th>표지에 표시할 정답</th></tr>';
-      for (const l of signs) cards += `<tr><td>${esc(l.name)}</td><td>${esc(l.sign.question)}</td><td><b>${esc(l.sign.answer)}</b></td></tr>`;
+      for (const r of rows) cards += `<tr><td>${esc(r.place)}</td><td>${esc(r.q)}</td><td><b>${esc(r.a)}</b></td></tr>`;
       cards += '</table></section>';
     }
   }

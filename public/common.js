@@ -31,12 +31,17 @@ function fmtSec(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return s >= 60 ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : `${s}`;
 }
+// 한국어 단위 표시: 1분 30초, 45초
+function fmtKr(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return s >= 60 ? `${Math.floor(s / 60)}분${s % 60 ? ' ' + (s % 60) + '초' : ''}` : `${s}초`;
+}
 // data-until="서버시각ms" 요소를 매 0.25초 갱신. data-frozen="ms"면 고정 표시.
 setInterval(() => {
   document.querySelectorAll('[data-until]').forEach(el => {
     const frozen = el.getAttribute('data-frozen');
     const left = frozen !== null && frozen !== '' ? Number(frozen) : Number(el.dataset.until) - serverNow();
-    el.textContent = (el.dataset.prefix || '') + fmtSec(left) + (el.dataset.suffix || '');
+    el.textContent = (el.dataset.prefix || '') + (el.dataset.unit === 'kr' ? fmtKr(left) : fmtSec(left)) + (el.dataset.suffix || '');
     if (el.classList.contains('timer')) el.classList.toggle('urgent', left <= 10000);
     const onDone = el.dataset.done;
     if (left <= 0 && onDone && !el.dataset.fired) { el.dataset.fired = '1'; window.dispatchEvent(new Event(onDone)); }
